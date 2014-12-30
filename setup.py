@@ -16,7 +16,7 @@ config = {
     'name': 'iDibo'
 }
 install_requires = [
-    'web2py >= 2.9.10'
+    'web2py >= 2.9.11'
 ]
 
 setup(**config)
