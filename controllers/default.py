@@ -17,7 +17,7 @@ def index():
     if you need a simple wiki simply replace the two lines below with:
     return auth.wiki()
     """
-    response.title = 'iDibo'
+    response.flash = T("Welcome to iDibo!")
     return dict()
 
 
@@ -36,6 +36,11 @@ def user():
         @auth.requires_permission('read','table name',record_id)
     to decorate functions that need access control
     """
+    if request.args[0] == 'register':
+        response.title = 'iDibo Registration'
+    else:
+        response.title = 'iDibo'
+
     return dict(form=auth())
 
 
@@ -71,9 +76,11 @@ def api():
     return Collection(db).process(request,response,rules)
 
 def register():
+    auth.settings.register_next = 'confirm.html'
     response.title = 'iDibo Registration'
-    return dict()
+    return dict(form = auth.register())
 
+@auth.requires_login()
 def confirm():
-    response.title = 'iDibo'
+    response.title = "iDibo"
     return dict()
