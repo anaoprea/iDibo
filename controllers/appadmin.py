@@ -35,7 +35,7 @@ except:
 if request.is_https:
     session.secure()
 elif (remote_addr not in hosts) and (remote_addr != "127.0.0.1") and \
-    (request.function != 'manage'):
+        (request.function != 'manage'):
     raise HTTP(200, T('appadmin is disabled because insecure channel'))
 
 if request.function == 'manage':
@@ -63,10 +63,11 @@ ignore_rw = True
 response.view = 'appadmin.html'
 if menu:
     response.menu = [[T('design'), False, URL('admin', 'default', 'design',
-                 args=[request.application])], [T('db'), False,
-                 URL('index')], [T('state'), False,
-                 URL('state')], [T('cache'), False,
-                 URL('ccache')]]
+                                              args=[request.application])], [T('db'), False,
+                                                                             URL('index')], [T('state'), False,
+                                                                                             URL('state')],
+                     [T('cache'), False,
+                      URL('ccache')]]
 
 # ##########################################################
 # ## auxiliary functions
@@ -74,8 +75,10 @@ if menu:
 
 if False and request.tickets_db:
     from gluon.restricted import TicketStorage
+
     ts = TicketStorage()
     ts._get_table(request.tickets_db, ts.tablename, request.application)
+
 
 def get_databases(request):
     dbs = {}
@@ -89,7 +92,9 @@ def get_databases(request):
             dbs[key] = value
     return dbs
 
+
 databases = get_databases(None)
+
 
 def eval_in_global_env(text):
     exec ('_ret=%s' % text, {}, global_env)
@@ -102,6 +107,7 @@ def get_database(request):
     else:
         session.flash = T('invalid request')
         redirect(URL('index'))
+
 
 def get_table(request):
     db = get_database(request)
@@ -160,20 +166,22 @@ def insert():
 
 def download():
     import os
+
     db = get_database(request)
     return response.download(request, db)
 
 
 def csv():
     import gluon.contenttype
+
     response.headers['Content-Type'] = \
         gluon.contenttype.contenttype('.csv')
     db = get_database(request)
     query = get_query(request)
     if not query:
         return None
-    response.headers['Content-disposition'] = 'attachment; filename=%s_%s.csv'\
-        % tuple(request.vars.query.split('.')[:2])
+    response.headers['Content-disposition'] = 'attachment; filename=%s_%s.csv' \
+                                              % tuple(request.vars.query.split('.')[:2])
     return str(db(query, ignore_common_filters=True).select())
 
 
@@ -183,6 +191,7 @@ def import_csv(table, file):
 
 def select():
     import re
+
     db = get_database(request)
     dbname = request.args[0]
     try:
@@ -212,7 +221,7 @@ def select():
 
     if is_imap:
         step = 3
- 
+
     stop = start + step
 
     table = None
@@ -228,15 +237,18 @@ def select():
     session.last_orderby = orderby
     session.last_query = request.vars.query
     form = FORM(TABLE(TR(T('Query:'), '', INPUT(_style='width:400px',
-                _name='query', _value=request.vars.query or '',
-                requires=IS_NOT_EMPTY(
-                    error_message=T("Cannot be empty")))), TR(T('Update:'),
-                INPUT(_name='update_check', _type='checkbox',
-                value=False), INPUT(_style='width:400px',
-                _name='update_fields', _value=request.vars.update_fields
-                                    or '')), TR(T('Delete:'), INPUT(_name='delete_check',
-                _class='delete', _type='checkbox', value=False), ''),
-                TR('', '', INPUT(_type='submit', _value=T('submit')))),
+                                                _name='query', _value=request.vars.query or '',
+                                                requires=IS_NOT_EMPTY(
+                                                    error_message=T("Cannot be empty")))), TR(T('Update:'),
+                                                                                              INPUT(
+                                                                                                  _name='update_check',
+                                                                                                  _type='checkbox',
+                                                                                                  value=False), INPUT(
+            _style='width:400px',
+            _name='update_fields', _value=request.vars.update_fields
+            or '')), TR(T('Delete:'), INPUT(_name='delete_check',
+                                            _class='delete', _type='checkbox', value=False), ''),
+                      TR('', '', INPUT(_type='submit', _value=T('submit')))),
                 _action=URL(r=request, args=request.args))
 
     tb = None
@@ -258,21 +270,22 @@ def select():
 
             if is_imap:
                 fields = [db[table][name] for name in
-                    ("id", "uid", "created", "to",
-                     "sender", "subject")]
+                          ("id", "uid", "created", "to",
+                           "sender", "subject")]
             if orderby:
                 rows = db(query, ignore_common_filters=True).select(
-                              *fields, limitby=(start, stop),
-                              orderby=eval_in_global_env(orderby))
+                    *fields, limitby=(start, stop),
+                    orderby=eval_in_global_env(orderby))
             else:
                 rows = db(query, ignore_common_filters=True).select(
                     *fields, limitby=(start, stop))
         except Exception, e:
             import traceback
+
             tb = traceback.format_exc()
             (rows, nrows) = ([], 0)
             response.flash = DIV(T('Invalid Query'), PRE(str(e)))
-    # begin handle upload csv
+            # begin handle upload csv
     csv_table = table or request.vars.table
     if csv_table:
         formcsv = FORM(str(T('or import from csv file')) + " ",
@@ -288,7 +301,7 @@ def select():
             response.flash = T('data uploaded')
         except Exception, e:
             response.flash = DIV(T('unable to parse csv file'), PRE(str(e)))
-    # end handle upload csv
+            # end handle upload csv
 
     return dict(
         form=form,
@@ -318,7 +331,7 @@ def update():
         key = [f for f in request.vars if f in db[table]._primarykey]
         if key:
             record = db(db[table][key[0]] == request.vars[key[
-                        0]]).select().first()
+                0]]).select().first()
     else:
         record = db(db[table].id == request.args(
             2)).select().first()
@@ -344,7 +357,7 @@ def update():
         session.flash = T('done!')
         qry = query_by_table_type(table, db)
         redirect(URL('select', args=request.args[:1],
-                 vars=dict(query=qry)))
+                     vars=dict(query=qry)))
     return dict(form=form, table=db[table])
 
 
@@ -399,6 +412,7 @@ def ccache():
 
     try:
         from guppy import hpy
+
         hp = hpy()
     except ImportError:
         hp = False
@@ -439,7 +453,7 @@ def ccache():
         gae_stats = cache.ram.client.get_stats()
         try:
             gae_stats['ratio'] = ((gae_stats['hits'] * 100) /
-                (gae_stats['hits'] + gae_stats['misses']))
+                                  (gae_stats['hits'] + gae_stats['misses']))
         except ZeroDivisionError:
             gae_stats['ratio'] = T("?")
         gae_stats['oldest'] = GetInHMS(time.time() - gae_stats['oldest_item_age'])
@@ -461,7 +475,7 @@ def ccache():
                 if value[0] < ram['oldest']:
                     ram['oldest'] = value[0]
                 ram['keys'].append((key, GetInHMS(time.time() - value[0])))
-        folder = os.path.join(request.folder,'cache')
+        folder = os.path.join(request.folder, 'cache')
         if not os.path.exists(folder):
             os.mkdir(folder)
         locker = open(os.path.join(folder, 'cache.lock'), 'a')
@@ -498,7 +512,7 @@ def ccache():
         total['keys'] = ram['keys'] + disk['keys']
         try:
             total['ratio'] = total['hits'] * 100 / (total['hits'] +
-                                                total['misses'])
+                                                    total['misses'])
         except (KeyError, ZeroDivisionError):
             total['ratio'] = 0
 
@@ -535,7 +549,7 @@ def table_template(table):
 
     def types(field):
         f_type = field.type
-        if not isinstance(f_type,str):
+        if not isinstance(f_type, str):
             return ' '
         elif f_type == 'string':
             return field.length
@@ -557,29 +571,29 @@ def table_template(table):
     border = 0
 
     rows.append(TR(TD(FONT(table, _face=face_bold, _color=bgcolor),
-                           _colspan=3, _cellpadding=cellpadding,
-                           _align="center", _bgcolor=color)))
+                      _colspan=3, _cellpadding=cellpadding,
+                      _align="center", _bgcolor=color)))
     for row in db[table]:
         rows.append(TR(TD(FONT(row.name, _color=color, _face=face_bold),
-                              _align="left", _cellpadding=cellpadding,
-                              _border=border),
+                          _align="left", _cellpadding=cellpadding,
+                          _border=border),
                        TD(FONT(row.type, _color=color, _face=face),
-                               _align="left", _cellpadding=cellpadding,
-                               _border=border),
+                          _align="left", _cellpadding=cellpadding,
+                          _border=border),
                        TD(FONT(types(row), _color=color, _face=face),
-                               _align="center", _cellpadding=cellpadding,
-                               _border=border)))
+                          _align="center", _cellpadding=cellpadding,
+                          _border=border)))
     return "< %s >" % TABLE(*rows, **dict(_bgcolor=bgcolor, _border=1,
                                           _cellborder=0, _cellspacing=0)
-                             ).xml()
+    ).xml()
 
 
 def bg_graph_model():
-    graph = pgv.AGraph(layout='dot',  directed=True,  strict=False,  rankdir='LR')
+    graph = pgv.AGraph(layout='dot', directed=True, strict=False, rankdir='LR')
 
     subgraphs = dict()
     for tablename in db.tables:
-        if hasattr(db[tablename],'_meta_graphmodel'):
+        if hasattr(db[tablename], '_meta_graphmodel'):
             meta_graphmodel = db[tablename]._meta_graphmodel
         else:
             meta_graphmodel = dict(group=request.application, color='#ECECEC')
@@ -596,17 +610,17 @@ def bg_graph_model():
 
     for n, key in enumerate(subgraphs.iterkeys()):
         graph.subgraph(nbunch=subgraphs[key]['tables'],
-                    name='cluster%d' % n,
-                    style='filled',
-                    color=subgraphs[key]['meta']['color'],
-                    label=subgraphs[key]['meta']['group'])
+                       name='cluster%d' % n,
+                       style='filled',
+                       color=subgraphs[key]['meta']['color'],
+                       label=subgraphs[key]['meta']['group'])
 
     for tablename in db.tables:
         for field in db[tablename]:
             f_type = field.type
-            if isinstance(f_type,str) and (
-                f_type.startswith('reference') or
-                f_type.startswith('list:reference')):
+            if isinstance(f_type, str) and (
+                    f_type.startswith('reference') or
+                    f_type.startswith('list:reference')):
                 referenced_table = f_type.split()[1].split('.')[0]
                 n1 = graph.get_node(tablename)
                 n2 = graph.get_node(referenced_table)
@@ -617,14 +631,16 @@ def bg_graph_model():
         response.headers['Content-Type'] = 'image/png'
         return graph.draw(format='png', prog='dot')
     else:
-        response.headers['Content-Disposition']='attachment;filename=graph.%s'%request.args(0)
+        response.headers['Content-Disposition'] = 'attachment;filename=graph.%s' % request.args(0)
         if request.args(0) == 'dot':
             return graph.string()
         else:
             return graph.draw(format=request.args(0), prog='dot')
 
+
 def graph_model():
     return dict(databases=databases, pgv=pgv)
+
 
 def manage():
     tables = manager_action['tables']
@@ -639,7 +655,8 @@ def manage():
         auth.table_permission()._plural = T('Permissions')
     if request.extension != 'load':
         return dict(heading=manager_action.get('heading',
-                    T('Manage %(action)s') % dict(action=request.args(0).replace('_', ' ').title())),
+                                               T('Manage %(action)s') % dict(
+                                                   action=request.args(0).replace('_', ' ').title())),
                     tablenames=[table._tablename for table in tables],
                     labels=[table._plural.title() for table in tables])
 
@@ -648,14 +665,14 @@ def manage():
     linked_tables = orderby = None
     if request.args(0) == 'auth':
         auth.table_group()._id.readable = \
-        auth.table_membership()._id.readable = \
-        auth.table_permission()._id.readable = False
+            auth.table_membership()._id.readable = \
+            auth.table_permission()._id.readable = False
         auth.table_membership().user_id.label = T('User')
         auth.table_membership().group_id.label = T('Role')
         auth.table_permission().group_id.label = T('Role')
         auth.table_permission().name.label = T('Permission')
         if table == auth.table_user():
-            linked_tables=[auth.settings.table_membership_name]
+            linked_tables = [auth.settings.table_membership_name]
         elif table == auth.table_group():
             orderby = 'role' if not request.args(3) or '.group_id' not in request.args(3) else None
         elif table == auth.table_permission():

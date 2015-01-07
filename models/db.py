@@ -1,15 +1,16 @@
-db = DAL('sqlite://storage.sqlite',pool_size=1,check_reserved=['all'])
-from gluon.tools import Auth, Service, PluginManager
+from gluon.tools import Auth
+
+db = DAL('sqlite://storage.sqlite', pool_size=1, check_reserved=['all'])
 
 auth = Auth(db)
 
-## This allows me to still be able to use the web2py auth module while still customising properly the fields
+# This allows using the web2py auth module while still customising properly the fields
 db.define_table('auth_user',
                 Field('first_name', length=128, default=''),
                 Field('last_name', length=128, default=''),
-                Field('voters_registration_number',),
+                Field('voters_registration_number', ),
                 Field('email', length=128, default='', unique=True),
-                Field('password', 'password', length=512,readable=False, label='Password'),
+                Field('password', 'password', length=512, readable=False, label='Password'),
                 Field('registration_key', length=512, writable=False, readable=False, default=''),
                 Field('reset_password_key', length=512, writable=False, readable=False, default=''),
                 Field('registration_id', length=512, writable=False, readable=False, default=''))
@@ -18,19 +19,17 @@ db.define_table('auth_user',
 custom_auth_table = db['auth_user'] # get the custom_auth_table
 custom_auth_table.first_name.requires = IS_NOT_EMPTY(error_message=auth.messages.is_empty)
 custom_auth_table.last_name.requires = IS_NOT_EMPTY(error_message=auth.messages.is_empty)
-custom_auth_table.password.requires = [IS_STRONG(special=0,upper=0,min=6), CRYPT()]#CRYPT validtor here hadles salting of the pasword
+custom_auth_table.password.requires = [IS_STRONG(special=0, upper=0, min=6),
+                                       CRYPT()]#CRYPT validator here handles salting of the password
 custom_auth_table.email.requires = [
-  IS_EMAIL(error_message=auth.messages.invalid_email),
-  IS_NOT_EMPTY(),
-  IS_NOT_IN_DB(db, custom_auth_table.email)]
+    IS_EMAIL(error_message=auth.messages.invalid_email),
+    IS_NOT_EMPTY(),
+    IS_NOT_IN_DB(db, custom_auth_table.email)]
 custom_auth_table.voters_registration_number.requires = [
     IS_NOT_EMPTY(),
     IS_NOT_IN_DB(db, custom_auth_table.voters_registration_number)
 ]
 
 auth.settings.table_user = custom_auth_table # tell auth to use custom_auth_table
-
 auth.settings.login_next = URL('confirm') #This helps to change the redirected url on user registration or login
-
-
-auth.define_tables(signature=False)
+auth.define_tables(signature=True)
