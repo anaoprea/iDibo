@@ -33,3 +33,16 @@ custom_auth_table.voters_registration_number.requires = [
 auth.settings.table_user = custom_auth_table # tell auth to use custom_auth_table
 auth.settings.login_next = URL('confirm') #This helps to change the redirected url on user registration or login
 auth.define_tables(signature=True)
+
+
+#test database that's laid out just like the "real" database
+import copy
+test_db = DAL('sqlite://testing.sqlite')
+for tablename in db.tables:
+    table_copy = [copy.copy(f) for f in db[tablename]]
+    test_db.define_table(tablename, *table_copy)
+
+
+
+
+
