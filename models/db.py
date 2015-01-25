@@ -9,6 +9,7 @@ db.define_table('auth_user',
                 Field('first_name', length=128, default=''),
                 Field('last_name', length=128, default=''),
                 Field('voters_registration_number', ),
+                Field('role'),
                 Field('email', length=128, default='', unique=True),
                 Field('password', 'password', length=512, readable=False, label='Password'),
                 Field('registration_key', length=512, writable=False, readable=False, default=''),
@@ -24,15 +25,18 @@ custom_auth_table.password.requires = [IS_STRONG(special=0, upper=0, min=6),
 custom_auth_table.email.requires = [
     IS_EMAIL(error_message=auth.messages.invalid_email),
     IS_NOT_EMPTY(),
-    IS_NOT_IN_DB(db, custom_auth_table.email)]
+    IS_NOT_IN_DB(db, custom_auth_table.email,error_message='Email already exists')]
 custom_auth_table.voters_registration_number.requires = [
     IS_NOT_EMPTY(),
     IS_NOT_IN_DB(db, custom_auth_table.voters_registration_number)
 ]
+custom_auth_table.role.requires = IS_IN_SET(['Regular user', 'Admin user'])
+
 
 auth.settings.table_user = custom_auth_table # tell auth to use custom_auth_table
 auth.settings.login_next = URL('confirm') #This helps to change the redirected url on user registration or login
 auth.define_tables(signature=True)
+
 
 
 #test database that's laid out just like the "real" database
