@@ -62,6 +62,7 @@ db.define_table('participation',
                 Field('has_voted',default='False'),
                 )
 
+#populate pariticapation table
 
 
 #test database that's laid out just like the "real" database

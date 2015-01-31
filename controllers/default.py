@@ -18,6 +18,7 @@ def index():
     return auth.wiki()
     """
     response.flash = T("Welcome to iDibo!")
+    #auth.settings.register_onaccept = _add_role()
     return dict()
 
 
@@ -66,5 +67,22 @@ def register():
 
 @auth.requires_login()
 def confirm():
-    response.title = "iDibo"
+    response.title = 'iDibo'
+    #count = db(db.campaigns.name).count
+    campaigns = db().select(db.campaigns.name)
+    return dict(campaigns=campaigns)
+
+
+@auth.requires_login()
+def confirm_html():
     return dict()
+    #
+    #def _add_role(form):
+    #    group_id = auth.id_group(role=form.vars.role)
+    #    user_id = form.vars.id
+    #    auth.add_membership(group_id,user_id)
+    #
+    #@auth.requires_login()
+    #@auth.requires_membership('Admin user')
+    #def confirm_admin():
+    #    return dict()
